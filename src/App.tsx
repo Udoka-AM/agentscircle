@@ -1,12 +1,9 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import {
   Activity,
   ArrowRight,
-  BarChart3,
   Bot,
-  BrainCircuit,
   Check,
-  ChevronRight,
   CircleDollarSign,
   Code2,
   GitBranch,
@@ -17,26 +14,89 @@ import {
   Target,
   TrendingUp,
   Trophy,
-  Users,
   X,
-  Zap,
   ShieldCheck,
 } from "lucide-react";
+import { AgentAvatar } from "./AgentAvatar";
+import {
+  FeatureDeployIcon,
+  FeatureShieldIcon,
+  FeatureSignalIcon,
+  HeroMark,
+} from "./HeroCube";
+import { HeroField, StarDust } from "./HeroField";
 
 const T = {
-  bg: "#050507",
-  card: "#0f0f12",
-  blue: "#4A9EFB",
+  bg: "#030406",
+  card: "#0c0e14",
+  blue: "#1885FF",
   white: "#ffffff",
-  muted: "#888896",
-  border: "rgba(255,255,255,0.08)",
-  green: "#48D597",
-  purple: "#9B7BFF",
+  muted: "#8b93a5",
+  border: "rgba(255,255,255,0.12)",
+  green: "#4FD6A0",
+  purple: "#8B7CFF",
 };
+
+type AgentMock = {
+  name: string;
+  market: string;
+  pnl: string;
+  winRate: string;
+  status: string;
+  score?: string;
+  rank?: string;
+};
+
+const AGENT_MOCKS: AgentMock[] = [
+  {
+    name: "Oracle Edge",
+    market: "Crypto",
+    pnl: "+42.8%",
+    winRate: "78%",
+    status: "LIVE",
+    score: "94.8",
+    rank: "01",
+  },
+  {
+    name: "Flash Signal",
+    market: "Sports",
+    pnl: "+31.4%",
+    winRate: "71%",
+    status: "LIVE",
+    score: "91.2",
+    rank: "02",
+  },
+  {
+    name: "Sentinel",
+    market: "Politics",
+    pnl: "+24.9%",
+    winRate: "69%",
+    status: "LIVE",
+    score: "88.7",
+    rank: "03",
+  },
+  {
+    name: "Probability X",
+    market: "Macro",
+    pnl: "+18.6%",
+    winRate: "66%",
+    status: "LIVE",
+    score: "86.1",
+    rank: "04",
+  },
+  {
+    name: "Market Pulse",
+    market: "Crypto",
+    pnl: "+27.3%",
+    winRate: "73%",
+    status: "LIVE",
+    score: "89.4",
+    rank: "05",
+  },
+];
 
 type FloatingAgentProps = {
   className?: string;
-  icon: React.ReactNode;
   name: string;
   market: string;
   pnl: string;
@@ -46,7 +106,6 @@ type FloatingAgentProps = {
 
 function FloatingAgent({
   className = "",
-  icon,
   name,
   market,
   pnl,
@@ -54,16 +113,16 @@ function FloatingAgent({
   status,
 }: FloatingAgentProps) {
   return (
-    <div className={`floating-agent ${className}`}>
+    <article className={`floating-agent ${className}`}>
       <div className="floating-agent-top">
-        <div className="agent-mini-icon">{icon}</div>
+        <AgentAvatar name={name} size={52} className="agent-mini-mark" />
 
         <div className="agent-mini-info">
           <strong>{name}</strong>
           <span>{market} markets</span>
         </div>
 
-        <span className="agent-live">
+        <span className="badge badge-soft agent-live">
           <i />
           {status}
         </span>
@@ -72,15 +131,15 @@ function FloatingAgent({
       <div className="floating-agent-stats">
         <div>
           <small>RETURN</small>
-          <strong className="positive">{pnl}</strong>
+          <strong className="positive tabular">{pnl}</strong>
         </div>
 
         <div>
           <small>WIN RATE</small>
-          <strong>{winRate}</strong>
+          <strong className="tabular">{winRate}</strong>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -89,11 +148,13 @@ function Btn({
   variant = "solid",
   href,
   onClick,
+  type = "button",
 }: {
   children: ReactNode;
   variant?: "solid" | "ghost";
   href?: string;
   onClick?: () => void;
+  type?: "button" | "submit";
 }) {
   const cls = `btn btn-${variant}`;
   if (href)
@@ -103,7 +164,7 @@ function Btn({
       </a>
     );
   return (
-    <button className={cls} onClick={onClick}>
+    <button className={cls} type={type} onClick={onClick}>
       {children}
     </button>
   );
@@ -113,33 +174,16 @@ function Overline({ children }: { children: ReactNode }) {
   return <p className="overline">{children}</p>;
 }
 
-function LogoIcon({ size = 30 }: { size?: number }) {
+function LogoIcon({ size = 36 }: { size?: number }) {
   return (
-    <svg
+    <img
+      src="/logo.png"
+      alt=""
       width={size}
       height={size}
-      viewBox="0 0 30 30"
-      fill="none"
-      aria-hidden="true"
-    >
-      <rect width="30" height="30" rx="8" fill={T.blue} />
-      <circle
-        cx="15"
-        cy="15"
-        r="8"
-        stroke="white"
-        strokeWidth="1.7"
-        opacity=".95"
-      />
-      <circle cx="15" cy="15" r="3" fill="white" />
-      <path
-        d="M15 5v4M15 21v4M5 15h4M21 15h4"
-        stroke="white"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        opacity=".75"
-      />
-    </svg>
+      className="brand-logo"
+      decoding="async"
+    />
   );
 }
 
@@ -154,13 +198,13 @@ function Nav() {
   ];
 
   return (
-    <nav className="nav">
+    <nav className="nav" aria-label="Primary">
       <a className="brand" href="#top" aria-label="Agent Circle home">
         <LogoIcon />
         <span>Agent Circle</span>
       </a>
 
-      <div className={`nav-links ${open ? "open" : ""}`}>
+      <div className={`nav-links ${open ? "open" : ""}`} id="primary-nav">
         {links.map(([label, href]) => (
           <a key={label} href={href} onClick={() => setOpen(false)}>
             {label}
@@ -175,9 +219,11 @@ function Nav() {
       <button
         className="mobile-menu"
         onClick={() => setOpen(!open)}
-        aria-label="Toggle menu"
+        aria-label={open ? "Close menu" : "Open menu"}
+        aria-expanded={open}
+        aria-controls="primary-nav"
       >
-        {open ? <X size={21} /> : <Menu size={21} />}
+        {open ? <X size={28} /> : <Menu size={28} />}
       </button>
     </nav>
   );
@@ -186,15 +232,9 @@ function Nav() {
 function HeroBackground() {
   return (
     <div className="hero-bg" aria-hidden="true">
+      <HeroField />
       <div className="orb orb-a" />
-      <div className="orb orb-b" />
-      <div className="orb orb-c" />
-      <div className="grid-floor" />
-      <div className="scan-line" />
-      <div className="data-stream stream-a">01 · 10 · 11 · 01 · 101 · 001</div>
-      <div className="data-stream stream-b">
-        AGENT / SIGNAL / EXECUTE / SETTLE
-      </div>
+      <div className="hero-vignette" />
     </div>
   );
 }
@@ -203,31 +243,30 @@ function Hero() {
   return (
     <section className="hero" id="top">
       <HeroBackground />
-      <div className="hero-content">
-        <div className="live-pill">
-          <span className="pulse-dot" />
-          Building on Solana · Early Access
+      <div className="hero-shell">
+        <div className="hero-focus hero-reveal" style={{ ["--d" as string]: "0ms" }}>
+          <HeroMark />
         </div>
 
-        <h1>
-          <span>The Next Traders</span>
-          <br />
-          <em>Are Agents.</em>
-        </h1>
-          
-        <div className="hero-proof">
-          <span className="proof-line" />
-          <strong>One marketplace.</strong>
-          <span>Traders, builders, and autonomous strategies.</span>
-        </div>
+        <div className="hero-copy">
+          <h1 className="display-heading hero-reveal" style={{ ["--d" as string]: "100ms" }}>
+            <span>The next traders</span>
+            <em>are agents.</em>
+          </h1>
 
-        <div className="hero-actions">
-          <Btn href="#agents">
-            Explore the Agents <ArrowRight size={17} />
-          </Btn>
-          <Btn variant="ghost" href="#builders">
-            Build an Agent
-          </Btn>
+          <p className="hero-lede hero-reveal" style={{ ["--d" as string]: "220ms" }}>
+            Rent proven AI trading agents — or ship yours and get paid. One
+            marketplace for traders, builders, and autonomous strategies.
+          </p>
+
+          <div className="hero-actions hero-reveal" style={{ ["--d" as string]: "320ms" }}>
+            <Btn href="#agents">
+              Explore the Agents <ArrowRight size={20} />
+            </Btn>
+            <Btn variant="ghost" href="#builders">
+              Build an Agent
+            </Btn>
+          </div>
         </div>
       </div>
     </section>
@@ -235,100 +274,21 @@ function Hero() {
 }
 
 function AgentMarquee() {
+  const track = [...AGENT_MOCKS, ...AGENT_MOCKS];
+
   return (
-    <div className="agent-marquee">
+    <div className="agent-marquee" aria-hidden="true">
       <div className="agent-marquee-track">
-        {/* First set */}
-        <FloatingAgent
-          icon={<BarChart3 size={17} />}
-          name="Oracle Edge"
-          market="Crypto"
-          pnl="+42.8%"
-          winRate="78%"
-          status="LIVE"
-        />
-
-        <FloatingAgent
-          icon={<Zap size={17} />}
-          name="Flash Signal"
-          market="Sports"
-          pnl="+31.4%"
-          winRate="71%"
-          status="LIVE"
-        />
-
-        <FloatingAgent
-          icon={<ShieldCheck size={17} />}
-          name="Sentinel"
-          market="Politics"
-          pnl="+24.9%"
-          winRate="69%"
-          status="LIVE"
-        />
-
-        <FloatingAgent
-          icon={<BrainCircuit size={17} />}
-          name="Probability X"
-          market="Macro"
-          pnl="+18.6%"
-          winRate="66%"
-          status="LIVE"
-        />
-
-        <FloatingAgent
-          icon={<Activity size={17} />}
-          name="Market Pulse"
-          market="Crypto"
-          pnl="+27.3%"
-          winRate="73%"
-          status="LIVE"
-        />
-
-        {/* Duplicate set for seamless loop */}
-        <FloatingAgent
-          icon={<BarChart3 size={17} />}
-          name="Oracle Edge"
-          market="Crypto"
-          pnl="+42.8%"
-          winRate="78%"
-          status="LIVE"
-        />
-
-        <FloatingAgent
-          icon={<Zap size={17} />}
-          name="Flash Signal"
-          market="Sports"
-          pnl="+31.4%"
-          winRate="71%"
-          status="LIVE"
-        />
-
-        <FloatingAgent
-          icon={<ShieldCheck size={17} />}
-          name="Sentinel"
-          market="Politics"
-          pnl="+24.9%"
-          winRate="69%"
-          status="LIVE"
-        />
-
-        <FloatingAgent
-          icon={<BrainCircuit size={17} />}
-          name="Probability X"
-          market="Macro"
-          pnl="+18.6%"
-          winRate="66%"
-          status="LIVE"
-        />
-
-        <FloatingAgent
-          icon={<Activity size={17} />}
-          name="Market Pulse"
-          market="Crypto"
-          pnl="+27.3%"
-          winRate="73%"
-          status="LIVE"
-        />
+        {track.map((agent, index) => (
+          <FloatingAgent
+            key={`${agent.name}-${index}`}
+            name={agent.name}
+            market={agent.market}
+            pnl={agent.pnl}
+            winRate={agent.winRate}
+            status={agent.status}
+          />
+        ))}
       </div>
     </div>
   );
@@ -336,121 +296,116 @@ function AgentMarquee() {
 
 const FEATURES = [
   {
-    icon: <BarChart3 />,
+    icon: <FeatureSignalIcon />,
+    index: "01",
     title: "Discover Proven Agents",
-    desc: "Compare real performance, drawdown, consistency, and market specialization before you commit capital.",
+    desc: "Compare performance, drawdown, consistency, and market focus before you commit capital.",
   },
   {
-    icon: <Zap />,
+    icon: <FeatureDeployIcon />,
+    index: "02",
     title: "Deploy Without Code",
-    desc: "Choose an agent, set your capital and risk limits, and deploy. No trading system to build from scratch.",
+    desc: "Pick an agent, set capital and risk limits, and go live — no system to build from scratch.",
   },
   {
-    icon: <ShieldCheck />,
+    icon: <FeatureShieldIcon />,
+    index: "03",
     title: "Stay in Control",
-    desc: "Set position caps, maximum drawdowns, and auto-pause rules. Diversify across agents and strategies.",
+    desc: "Position caps, max drawdown, and auto-pause rules keep exposure on your terms.",
   },
 ];
 
 function Features() {
   return (
-    <section className="section" id="agents">
-      <div className="section-heading">
-        <h2>
-          Scout for a proven agent.
-          <br />
-          <span>See the track record.</span>
+    <section className="section agents-section" id="agents">
+      <header className="agents-intro agents-reveal" style={{ ["--i" as string]: 0 }}>
+        <Overline>Discovery</Overline>
+        <h2 className="display-heading">
+          <span>Scout for a proven agent.</span>
+          <em>See the track record.</em>
         </h2>
+        <p>
+          Live rankings surface agents that earn trust through results — then
+          deploy with risk controls already in place.
+        </p>
+      </header>
 
-        <AgentDiscoveryVisual />
-      </div>
+      <div className="agents-bento">
+        <div
+          className="agents-board agents-reveal"
+          style={{ ["--i" as string]: 1 }}
+        >
+          <AgentDiscoveryVisual />
+        </div>
 
-      <div className="feature-grid">
-        {FEATURES.map((item) => (
-          <div className="feature-card" key={item.title}>
-            <div className="icon-tile">{item.icon}</div>
-
-            <div>
-              <h3>{item.title}</h3>
-              <p>{item.desc}</p>
-            </div>
-
-            <div className="card-arrow">
-              <ChevronRight size={18} />
-            </div>
-          </div>
-        ))}
+        <div className="agents-caps" role="list">
+          {FEATURES.map((item, index) => (
+            <article
+              className="capability-tile agents-reveal"
+              role="listitem"
+              key={item.title}
+              style={{ ["--i" as string]: index + 2 }}
+            >
+              <div className="capability-icon" aria-hidden="true">
+                {item.icon}
+              </div>
+              <div className="capability-copy">
+                <h3>{item.title}</h3>
+                <p>{item.desc}</p>
+              </div>
+              <span className="capability-index tabular" aria-hidden="true">
+                {item.index}
+              </span>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
 function AgentDiscoveryVisual() {
-  const agents = [
-    {
-      rank: "01",
-      name: "Oracle Edge",
-      category: "Crypto",
-      score: "94.8",
-      returnValue: "+42.8%",
-      icon: <BarChart3 size={15} />,
-    },
-    {
-      rank: "02",
-      name: "Flash Signal",
-      category: "Sports",
-      score: "91.2",
-      returnValue: "+31.4%",
-      icon: <Zap size={15} />,
-    },
-    {
-      rank: "03",
-      name: "Sentinel",
-      category: "Politics",
-      score: "88.7",
-      returnValue: "+24.9%",
-      icon: <ShieldCheck size={15} />,
-    },
-  ];
+  const agents = AGENT_MOCKS.slice(0, 3);
 
   return (
-    <div className="agent-discovery-visual">
+    <div className="agent-discovery-visual card-surface">
       <div className="discovery-header">
         <div className="discovery-title">
           <span className="discovery-live-dot" />
           AGENT LEADERBOARD
         </div>
 
-        <span className="discovery-status">LIVE</span>
+        <span className="badge badge-live">LIVE</span>
       </div>
 
-      <div className="discovery-columns">
+      <div className="discovery-columns" aria-hidden="true">
         <span>AGENT</span>
         <span>SCORE</span>
         <span>RETURN</span>
       </div>
 
-      <div className="agent-ranking-list">
+      <div className="agent-ranking-list" role="list">
         {agents.map((agent, index) => (
           <div
             className="agent-ranking-row"
+            role="listitem"
             key={agent.name}
             style={{
               animationDelay: `${index * 0.8}s`,
             }}
           >
-            <span className="agent-rank">{agent.rank}</span>
+            <span className="agent-rank tabular">{agent.rank}</span>
 
-            <div className="agent-ranking-icon">{agent.icon}</div>
+            <AgentAvatar name={agent.name} size={40} />
 
             <div className="agent-ranking-name">
               <strong>{agent.name}</strong>
-              <small>{agent.category} markets</small>
+              <small>{agent.market} markets</small>
             </div>
 
-            <strong className="agent-score">{agent.score}</strong>
+            <strong className="agent-score tabular">{agent.score}</strong>
 
-            <strong className="agent-return">{agent.returnValue}</strong>
+            <strong className="agent-return tabular">{agent.pnl}</strong>
           </div>
         ))}
       </div>
@@ -458,7 +413,7 @@ function AgentDiscoveryVisual() {
       <div className="discovery-footer">
         <span>Performance verified from live trading history</span>
 
-        <div className="signal-bars">
+        <div className="signal-bars" aria-hidden="true">
           <i />
           <i />
           <i />
@@ -478,27 +433,35 @@ const SIGNALS = [
 
 function Marketplace() {
   return (
-    <section className="marketplace section-wide">
-      <div className="marketplace-inner">
+    <section className="marketplace section-wide" id="marketplace">
+      <div className="marketplace-shell">
         <div className="marketplace-copy">
           <Overline>The Agent Marketplace</Overline>
-          <h2>
-            The best agents
-            <br />
-            <span>rise to the top.</span>
+          <h2 className="display-heading">
+            <span>The best agents</span>
+            <em>rise to the top.</em>
           </h2>
           <p>
             Every agent has a track record. Every builder has a reputation.
             Performance drives discovery — and discovery drives the economy.
           </p>
-          <div className="flow">
+          <div className="flow marketplace-flow">
             <span>Performance</span>
-            <i>→</i>
+            <i />
             <span>Discovery</span>
-            <i>→</i>
+            <i />
             <span>Capital</span>
-            <i>→</i>
+            <i />
             <span>Better Agents</span>
+          </div>
+          <div className="pill-row marketplace-pills">
+            {["Real performance", "Transparent rankings", "User-controlled risk"].map(
+              (item) => (
+                <div className="pill" key={item}>
+                  <Check size={18} /> {item}
+                </div>
+              )
+            )}
           </div>
         </div>
 
@@ -507,32 +470,30 @@ function Marketplace() {
             <div className="terminal-status">
               <span className="pulse-dot" /> Agent Leaderboard
             </div>
-            <span className="terminal-live">LIVE</span>
+            <span className="badge badge-live">LIVE</span>
           </div>
 
           <div className="agent-featured">
-            <div className="agent-avatar">
-              <BrainCircuit size={24} />
-            </div>
+            <AgentAvatar name="SignalForge" size={56} />
             <div>
               <strong>SignalForge</strong>
               <small>Macro · Politics · Event Markets</small>
             </div>
-            <div className="agent-rank">#01</div>
+            <div className="agent-rank badge badge-soft">#01</div>
           </div>
 
           <div className="terminal-stats">
             <div>
               <small>Win Rate</small>
-              <strong>71.8%</strong>
+              <strong className="tabular">71.8%</strong>
             </div>
             <div>
               <small>Max Drawdown</small>
-              <strong>-8.2%</strong>
+              <strong className="tabular">-8.2%</strong>
             </div>
             <div>
               <small>Consistency</small>
-              <strong>94</strong>
+              <strong className="tabular">94</strong>
             </div>
           </div>
 
@@ -551,35 +512,23 @@ function Marketplace() {
           </div>
         </div>
       </div>
-
-      <div className="pill-row">
-        {[
-          "Real performance",
-          "Transparent rankings",
-          "User-controlled risk",
-        ].map((item) => (
-          <div className="pill" key={item}>
-            <Check size={14} /> {item}
-          </div>
-        ))}
-      </div>
     </section>
   );
 }
 
 const BUILDER_CARDS = [
   {
-    icon: <Code2 />,
+    icon: <Code2 size={42} />,
     title: "Build",
     desc: "Create specialized agents with an open SDK and market connectors.",
   },
   {
-    icon: <Trophy />,
+    icon: <Trophy size={42} />,
     title: "Prove",
     desc: "Compete on public rankings built around measurable performance.",
   },
   {
-    icon: <CircleDollarSign />,
+    icon: <CircleDollarSign size={42} />,
     title: "Earn",
     desc: "Turn strong performance into recurring marketplace revenue.",
   },
@@ -589,10 +538,9 @@ function Builders() {
   return (
     <section className="section" id="builders">
       <div className="section-heading">
-        <h2>
-          Build an agent.
-          <br />
-          <span>Build a business.</span>
+        <h2 className="display-heading">
+          <span>Build an agent.</span>
+          <em>Build a business.</em>
         </h2>
         <p>
           Agent Circle gives developers distribution, reputation, recurring
@@ -615,7 +563,7 @@ function Builders() {
       <div className="builder-bottom">
         <div className="sdk-card">
           <div className="sdk-icon">
-            <GitBranch size={22} />
+            <GitBranch size={36} />
           </div>
           <div>
             <strong>Open SDK. Open connectors. Open competition.</strong>
@@ -626,7 +574,7 @@ function Builders() {
           </div>
         </div>
         <Btn variant="ghost" href="#waitlist">
-          Build on Agent Circle <ArrowRight size={16} />
+          Build on Agent Circle <ArrowRight size={22} />
         </Btn>
       </div>
     </section>
@@ -648,10 +596,9 @@ function Trust() {
       <div className="trust-grid">
         <div>
           <Overline>Trust & Integrity</Overline>
-          <h2>
-            Performance is the
-            <br />
-            <span>reputation layer.</span>
+          <h2 className="display-heading">
+            <span>Performance is the</span>
+            <em>reputation layer.</em>
           </h2>
           <p>
             Agents earn their position through results. Builders build
@@ -660,7 +607,7 @@ function Trust() {
           <div className="check-grid">
             {checks.map((item) => (
               <div key={item}>
-                <Check size={15} />
+                <Check size={22} />
                 {item}
               </div>
             ))}
@@ -670,7 +617,7 @@ function Trust() {
         <div className="score-card">
           <div className="score-header">
             <div className="score-symbol">
-              <ShieldCheck size={23} />
+              <ShieldCheck size={36} />
             </div>
             <div>
               <Overline>Builder Score</Overline>
@@ -688,7 +635,7 @@ function Trust() {
             Confirmed manipulation puts the reputation bond at risk.
           </p>
           <div className="score-note">
-            <Sparkles size={14} /> Score is based on trading performance — not
+            <Sparkles size={22} /> Score is based on trading performance — not
             token volume.
           </div>
         </div>
@@ -699,27 +646,27 @@ function Trust() {
 
 const STEPS = [
   {
-    icon: <Target />,
+    icon: <Target size={40} />,
     title: "Discover",
     desc: "Browse agents by market, strategy, performance, and risk.",
   },
   {
-    icon: <Activity />,
+    icon: <Activity size={40} />,
     title: "Verify",
     desc: "Review the track record before committing capital.",
   },
   {
-    icon: <Bot />,
+    icon: <Bot size={40} />,
     title: "Deploy",
     desc: "Allocate capital and define your personal risk limits.",
   },
   {
-    icon: <TrendingUp />,
+    icon: <TrendingUp size={40} />,
     title: "Monitor",
     desc: "Track your agent's performance and activity.",
   },
   {
-    icon: <Layers3 />,
+    icon: <Layers3 size={40} />,
     title: "Diversify",
     desc: "Spread exposure across agents and strategies.",
   },
@@ -730,10 +677,9 @@ function HowItWorks() {
     <section className="section" id="how-it-works">
       <div className="center-heading">
         <Overline>How It Works</Overline>
-        <h2>
-          From discovery
-          <br />
-          <span>to deployment.</span>
+        <h2 className="display-heading">
+          <span>From discovery</span>
+          <em>to deployment.</em>
         </h2>
       </div>
 
@@ -754,22 +700,22 @@ function HowItWorks() {
 function Token() {
   const utilities = [
     {
-      icon: <ShieldCheck />,
+      icon: <ShieldCheck size={42} />,
       title: "Builder Reputation",
       desc: "Stake $AGENT as a reputation bond. Strong performance unlocks better marketplace terms.",
     },
     {
-      icon: <Sparkles />,
+      icon: <Sparkles size={42} />,
       title: "Agent Economies",
       desc: "Eligible top agents can unlock optional tokenized share classes for community-backed growth.",
     },
     {
-      icon: <Code2 />,
+      icon: <Code2 size={42} />,
       title: "Platform Access",
       desc: "External developers can access marketplace infrastructure through SDK and API usage.",
     },
     {
-      icon: <CircleDollarSign />,
+      icon: <CircleDollarSign size={42} />,
       title: "Ecosystem Rewards",
       desc: "A portion of platform revenue can support an epoch-based buyback mechanism.",
     },
@@ -780,10 +726,9 @@ function Token() {
       <div className="token-top">
         <div>
           <Overline>The Agent Circle Economy</Overline>
-          <h2>
-            One ecosystem.
-            <br />
-            <span>Many ways to participate.</span>
+          <h2 className="display-heading">
+            <span>One ecosystem.</span>
+            <em>Many ways to participate.</em>
           </h2>
         </div>
         <p>
@@ -805,41 +750,54 @@ function Token() {
   );
 }
 
-function Community() {
-  return (
-    <section className="community" id="community">
-      <div className="community-glow" />
-      <Overline>Join the Agent Economy</Overline>
-      <h2>
-        The agent economy
-        <br />
-        <span>starts here.</span>
-      </h2>
-      <p>
-        Prediction markets are becoming faster, more competitive, and
-        increasingly automated. Agent Circle is building the marketplace where
-        the next generation of traders — and the builders behind them —
-        compete.
-      </p>
-      <div className="community-actions">
-        <Btn href="#waitlist">
-          Join the Waitlist <ArrowRight size={17} />
-        </Btn>
-        <Btn variant="ghost" href="#builders">
-          Build an Agent
-        </Btn>
-      </div>
-      <div className="community-proof">
-        <Users size={16} /> Early access for traders, builders, and ecosystem
-        contributors.
-      </div>
-    </section>
-  );
-}
+const FOOTER_COLS = [
+  {
+    heading: "Marketplace",
+    links: [
+      { label: "Explore Agents", href: "#agents" },
+      { label: "Leaderboard", href: "#marketplace" },
+      { label: "How It Works", href: "#how-it-works" },
+      { label: "Risk Controls", href: "#how-it-works" },
+    ],
+  },
+  {
+    heading: "Builders",
+    links: [
+      { label: "Build an Agent", href: "#builders" },
+      { label: "SDK", href: "#builders" },
+      { label: "Documentation", href: "#builders" },
+      { label: "Builder Score", href: "#builders" },
+    ],
+  },
+  {
+    heading: "$AGENT",
+    links: [
+      { label: "Token Overview", href: "#token" },
+      { label: "Token Utility", href: "#token" },
+      { label: "Agent Economies", href: "#token" },
+      { label: "Tokenomics", href: "#token" },
+    ],
+  },
+  {
+    heading: "Community",
+    links: [
+      { label: "X", href: "#community" },
+      { label: "Discord", href: "#community" },
+      { label: "Telegram", href: "#community" },
+      {
+        label: "GitHub",
+        href: "https://github.com/el-uno/agentscircle",
+        external: true,
+      },
+    ],
+  },
+];
 
-function Waitlist() {
+function FooterDock() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const emailFieldId = useId();
+  const statusId = useId();
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -848,106 +806,88 @@ function Waitlist() {
   };
 
   return (
-    <section className="waitlist" id="waitlist">
-      <div className="waitlist-inner">
-        <div>
-          <Overline>Early Access</Overline>
-          <h2>
-            Be early to<br />
-            <span>Agent Circle.</span>
+    <footer className="footer-dock" id="waitlist">
+      <div className="footer-panel">
+        <div className="footer-cta">
+          <h2 className="display-heading">
+            <span>Be early to</span>
+            <em>Agent Circle.</em>
           </h2>
           <p>
             Join the first wave of traders and builders shaping the marketplace
             for AI trading agents.
           </p>
-        </div>
-        {submitted ? (
-          <div className="submitted">
-            <Check size={20} /> You're on the list. We'll be in touch.
-          </div>
-        ) : (
-          <form className="waitlist-form" onSubmit={submit}>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              aria-label="Email address"
-            />
-            <button type="submit">
-              Get Early Access <ArrowRight size={16} />
-            </button>
-          </form>
-        )}
-      </div>
-    </section>
-  );
-}
-
-const FOOTER_COLS = [
-  {
-    heading: "Marketplace",
-    links: ["Explore Agents", "Leaderboard", "How It Works", "Risk Controls"],
-  },
-  {
-    heading: "Builders",
-    links: ["Build an Agent", "SDK", "Documentation", "Builder Score"],
-  },
-  {
-    heading: "$AGENT",
-    links: [
-      "Token Overview",
-      "Token Utility",
-      "Agent Economies",
-      "Tokenomics",
-    ],
-  },
-  { heading: "Community", links: ["X", "Discord", "Telegram", "GitHub"] },
-];
-
-function Footer() {
-  return (
-    <footer>
-      <div className="footer-grid">
-        <div className="footer-brand">
-          <a className="brand" href="#top">
-            <LogoIcon />
-            <span>Agent Circle</span>
-          </a>
-          <p>
-            Solana-native marketplace for AI trading agents — connecting traders
-            with the builders creating the next generation of autonomous
-            strategies.
-          </p>
-          <a
-            className="github-link"
-            href="https://github.com"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Github size={16} /> GitHub
-          </a>
+          {submitted ? (
+            <div className="submitted" id={statusId} role="status" aria-live="polite">
+              <Check size={28} /> You're on the list. We'll be in touch.
+            </div>
+          ) : (
+            <form className="waitlist-form footer-form" onSubmit={submit}>
+              <label className="sr-only" htmlFor={emailFieldId}>
+                Email address
+              </label>
+              <input
+                id={emailFieldId}
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+              <button type="submit">
+                Get Early Access <ArrowRight size={20} />
+              </button>
+            </form>
+          )}
         </div>
 
-        {FOOTER_COLS.map((col) => (
-          <div key={col.heading} className="footer-col">
-            <strong>{col.heading}</strong>
-            {col.links.map((link) => (
-              <a href="#" key={link}>
-                {link}
-              </a>
-            ))}
+        <div className="footer-grid" id="community">
+          <div className="footer-brand">
+            <a className="brand" href="#top">
+              <LogoIcon />
+              <span>Agent Circle</span>
+            </a>
+            <p>
+              Solana-native marketplace for AI trading agents — connecting traders
+              with the builders creating the next generation of autonomous
+              strategies.
+            </p>
+            <a
+              className="github-link"
+              href="https://github.com/el-uno/agentscircle"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Github size={22} /> GitHub
+            </a>
           </div>
-        ))}
-      </div>
 
-      <div className="footer-bottom">
-        <span>© 2026 Agent Circle. Built on Solana.</span>
-        <div>
-          <a href="#">Privacy</a>
-          <a href="#">Terms</a>
-          <a href="#">Risk Disclosure</a>
+          {FOOTER_COLS.map((col) => (
+            <div key={col.heading} className="footer-col">
+              <strong>{col.heading}</strong>
+              {col.links.map((link) => (
+                <a
+                  href={link.href}
+                  key={link.label}
+                  {...(link.external
+                    ? { target: "_blank", rel: "noreferrer" }
+                    : {})}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        <div className="footer-bottom">
+          <span>© 2026 Agent Circle. Built on Solana.</span>
+          <div>
+            <a href="#top">Privacy</a>
+            <a href="#top">Terms</a>
+            <a href="#how-it-works">Risk Disclosure</a>
+          </div>
         </div>
       </div>
     </footer>
@@ -961,31 +901,58 @@ export default function App() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) entry.target.classList.add("visible");
         }),
-      { threshold: 0.08 }
+      { threshold: 0.12 }
     );
     document
-      .querySelectorAll(".section, .section-wide, .community, .waitlist")
+      .querySelectorAll(".section, .section-wide, .feature-card-flow")
       .forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const token = document.getElementById("token");
+    const dock = document.querySelector(".footer-dock") as HTMLElement | null;
+    if (!token || !dock) return;
+
+    const onScroll = () => {
+      const rect = dock.getBoundingClientRect();
+      const viewport = window.innerHeight || 1;
+      // Only start soft recede once the footer has climbed into the lower half
+      const start = viewport * 0.62;
+      const progress = Math.min(1, Math.max(0, (start - rect.top) / (viewport * 0.55)));
+      token.style.setProperty("--recede", String(progress));
+      token.classList.toggle("is-receding", progress > 0.08);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
   return (
     <div className="app">
+      <a className="skip-link" href="#main">
+        Skip to content
+      </a>
+      <StarDust count={56} />
       <Nav />
-      <main>
+      <main className="main-surface" id="main">
         <Hero />
         <AgentMarquee />
-        {/* <Ecosystem /> */}
         <Features />
         <Marketplace />
         <Builders />
         <Trust />
         <HowItWorks />
-        <Token />
-        <Community />
-        <Waitlist />
+        <div className="end-reveal">
+          <Token />
+          <FooterDock />
+        </div>
       </main>
-      <Footer />
     </div>
   );
 }

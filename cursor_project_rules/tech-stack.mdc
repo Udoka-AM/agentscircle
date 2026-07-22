@@ -1,0 +1,10 @@
+# Tech stack
+
+- **Runtime UI:** React 18 + TypeScript
+- **Bundler:** Vite 6 (`npm run dev` / `npm run build`)
+- **Icons:** lucide-react
+- **Styling:** plain CSS in `src/styles.css` (no Tailwind, no component library)
+- **Entry:** `src/main.tsx` → `src/App.tsx` (monolithic landing page)
+- **Fonts:** Google Fonts Inter (candidate for replacement in UI overhaul)
+- **Backend:** none; waitlist is client-side only
+- **Hosting:** static `dist/`; Vercel homepage URL configured on GitHub
