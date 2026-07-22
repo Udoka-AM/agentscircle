@@ -1,0 +1,37 @@
+# Implementation plan
+
+## Status: Visual pass in progress
+
+Plan: `~/.claude/plans/agentscircle-ui-visual-overhaul.md`
+
+## Done
+
+### Clone and assimilate — 2026-07-22
+Done
+Cloned `el-uno/agentscircle` to `/home/david/agentscircle`.
+Assimilated Vite/React landing: single `App.tsx`, dark Inter/blue/purple aesthetic, waitlist frontend-only.
+
+### Visual-only glass redesign — 2026-07-22
+Done
+Rewrote `src/styles.css` for frosted glass panels, aurora gradients, Syne+Manrope type.
+Kept section copy/structure; started local `npm run dev` for preview.
+
+### Agents section bento overhaul — 2026-07-22
+Done
+Bento grid: live leaderboard + compact capability tiles; staggered scroll reveal.
+Custom animated SVG icons for discover / deploy / control.
+
+
+
+### Spring cube + ui-craft final pass — 2026-07-22
+Done
+Textured cube with random spin + cursor spring; skip-link/focus/a11y polish.
+ui-craft dials VISUAL_VARIANCE 7 / MOTION 7 / DENSITY 4; AX N/A (marketing landing).
+
+### Replace cube with center brand mark — 2026-07-22
+Done
+Dropped HeroCube; HeroMark orbital logo is the hero center focus.
+
+### Hero two-col type polish — 2026-07-22
+Done
+Two-column hero restored; headline ExtraBold contrast + sharper lede/CTAs.
