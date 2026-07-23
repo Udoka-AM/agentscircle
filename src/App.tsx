@@ -18,6 +18,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { AgentAvatar } from "./AgentAvatar";
+import { supabase } from "./supabaseClient";
 import {
   FeatureDeployIcon,
   FeatureShieldIcon,
@@ -170,8 +171,8 @@ function Btn({
   );
 }
 
-function Overline({ children }: { children: ReactNode }) {
-  return <p className="overline">{children}</p>;
+function Overline({ children, accent = false }: { children: ReactNode; accent?: boolean }) {
+  return <p className={`overline ${accent ? "accent" : ""}`}>{children}</p>;
 }
 
 function LogoIcon({ size = 36 }: { size?: number }) {
@@ -255,7 +256,7 @@ function Hero() {
           </h1>
 
           <p className="hero-lede hero-reveal" style={{ ["--d" as string]: "220ms" }}>
-            Rent proven AI trading agents — or ship yours and get paid. One
+            Rent proven AI trading agents or ship yours and get paid. One
             marketplace for traders, builders, and autonomous strategies.
           </p>
 
@@ -319,7 +320,7 @@ function Features() {
   return (
     <section className="section agents-section" id="agents">
       <header className="agents-intro agents-reveal" style={{ ["--i" as string]: 0 }}>
-        <Overline>Discovery</Overline>
+        <Overline accent>Discovery</Overline>
         <h2 className="display-heading">
           <span>Scout for a proven agent.</span>
           <em>See the track record.</em>
@@ -436,7 +437,7 @@ function Marketplace() {
     <section className="marketplace section-wide" id="marketplace">
       <div className="marketplace-shell">
         <div className="marketplace-copy">
-          <Overline>The Agent Marketplace</Overline>
+          <Overline accent>The Agent Marketplace</Overline>
           <h2 className="display-heading">
             <span>The best agents</span>
             <em>rise to the top.</em>
@@ -676,7 +677,7 @@ function HowItWorks() {
   return (
     <section className="section" id="how-it-works">
       <div className="center-heading">
-        <Overline>How It Works</Overline>
+        <Overline accent>How It Works</Overline>
         <h2 className="display-heading">
           <span>From discovery</span>
           <em>to deployment.</em>
@@ -725,7 +726,7 @@ function Token() {
     <section className="token section-wide" id="token">
       <div className="token-top">
         <div>
-          <Overline>The Agent Circle Economy</Overline>
+          <Overline accent>The Agent Circle Economy</Overline>
           <h2 className="display-heading">
             <span>One ecosystem.</span>
             <em>Many ways to participate.</em>
@@ -750,40 +751,41 @@ function Token() {
   );
 }
 
+const DOCS = "https://agent-circle.mintlify.site";
+
 const FOOTER_COLS = [
   {
     heading: "Marketplace",
     links: [
-      { label: "Explore Agents", href: "#agents" },
-      { label: "Leaderboard", href: "#marketplace" },
-      { label: "How It Works", href: "#how-it-works" },
-      { label: "Risk Controls", href: "#how-it-works" },
+      { label: "Explore Agents", href: `${DOCS}/traders/discover-agents`, external: true },
+      { label: "Leaderboard", href: `${DOCS}/concepts/marketplace`, external: true },
+      { label: "How It Works", href: `${DOCS}/introduction`, external: true },
+      { label: "Risk Controls", href: `${DOCS}/traders/risk-controls`, external: true },
     ],
   },
   {
     heading: "Builders",
     links: [
-      { label: "Build an Agent", href: "#builders" },
-      { label: "SDK", href: "#builders" },
-      { label: "Documentation", href: "#builders" },
-      { label: "Builder Score", href: "#builders" },
+      { label: "Build an Agent", href: `${DOCS}/builders/overview`, external: true },
+      { label: "SDK", href: `${DOCS}/builders/sdk-grants`, external: true },
+      { label: "Documentation", href: DOCS, external: true },
+      { label: "Builder Score", href: `${DOCS}/concepts/builder-score`, external: true },
     ],
   },
   {
     heading: "$AGENT",
     links: [
-      { label: "Token Overview", href: "#token" },
-      { label: "Token Utility", href: "#token" },
-      { label: "Agent Economies", href: "#token" },
-      { label: "Tokenomics", href: "#token" },
+      { label: "Token Overview", href: `${DOCS}/concepts/token`, external: true },
+      { label: "Token Utility", href: `${DOCS}/platform/agent-token`, external: true },
+      { label: "Agent Economies", href: `${DOCS}/builders/sub-tokens`, external: true },
+      { label: "Tokenomics", href: `${DOCS}/platform/buyback-mechanism`, external: true },
     ],
   },
   {
     heading: "Community",
     links: [
-      { label: "X", href: "#community" },
-      { label: "Discord", href: "#community" },
-      { label: "Telegram", href: "#community" },
+      { label: "X", href: "https://x.com/agents_circle", external: true },
+      { label: "Telegram", href: "https://t.me/+Zf6LZ2Eb6u1jODA0", external: true },
       {
         label: "GitHub",
         href: "https://github.com/el-uno/agentscircle",
@@ -793,16 +795,38 @@ const FOOTER_COLS = [
   },
 ];
 
+type WaitlistRole = "trader" | "builder";
+
 function FooterDock() {
   const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [role, setRole] = useState<WaitlistRole>("trader");
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
   const emailFieldId = useId();
   const statusId = useId();
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
-    setSubmitted(true);
+    if (!email.trim() || status === "loading") return;
+
+    setStatus("loading");
+    setErrorMsg("");
+
+    const { error } = await supabase
+      .from("waitlist")
+      .insert({ email: email.trim().toLowerCase(), role });
+
+    if (error) {
+      setStatus("error");
+      setErrorMsg(
+        error.code === "23505"
+          ? "That email is already on the list."
+          : "Something went wrong. Please try again."
+      );
+      return;
+    }
+
+    setStatus("done");
   };
 
   return (
@@ -817,27 +841,52 @@ function FooterDock() {
             Join the first wave of traders and builders shaping the marketplace
             for AI trading agents.
           </p>
-          {submitted ? (
+          {status === "done" ? (
             <div className="submitted" id={statusId} role="status" aria-live="polite">
               <Check size={28} /> You're on the list. We'll be in touch.
             </div>
           ) : (
             <form className="waitlist-form footer-form" onSubmit={submit}>
-              <label className="sr-only" htmlFor={emailFieldId}>
-                Email address
-              </label>
-              <input
-                id={emailFieldId}
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-              />
-              <button type="submit">
-                Get Early Access <ArrowRight size={20} />
-              </button>
+              <div className="waitlist-role" role="radiogroup" aria-label="I am a">
+                {(["trader", "builder"] as const).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    role="radio"
+                    aria-checked={role === option}
+                    className={`role-pill ${role === option ? "active" : ""}`}
+                    onClick={() => setRole(option)}
+                  >
+                    I'm a {option}
+                  </button>
+                ))}
+              </div>
+
+              <div className="waitlist-input-row">
+                <label className="sr-only" htmlFor={emailFieldId}>
+                  Email address
+                </label>
+                <input
+                  id={emailFieldId}
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  aria-describedby={status === "error" ? statusId : undefined}
+                />
+                <button type="submit" disabled={status === "loading"}>
+                  {status === "loading" ? "Joining…" : "Get Early Access"}
+                  <ArrowRight size={20} />
+                </button>
+              </div>
+
+              {status === "error" && (
+                <p className="waitlist-error" id={statusId} role="alert">
+                  {errorMsg}
+                </p>
+              )}
             </form>
           )}
         </div>
